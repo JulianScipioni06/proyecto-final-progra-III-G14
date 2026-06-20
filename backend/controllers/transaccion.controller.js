@@ -1,4 +1,6 @@
 const Transaccion = require('../models/transaccion.model');
+const Categoria = require('../models/categoria.model');
+const { Op, Sequelize } = require('sequelize');
 
 const crearTransaccion = async (req, res) => {
     try {
@@ -44,7 +46,107 @@ const crearTransaccion = async (req, res) => {
         });
     }
 };
+const obtenerHistorial = async (req, res) => {
+    try {
+        const { id_usuario } = req.params;
+        const { tipo, id_categoria, fechaInicio, fechaFin } = req.query;
+    
+        let filtros = { id_usuario };
+    
+        //Filtro por tipo de Ingreso o Gasto
+        if (tipo) {
+            filtros.tipo = tipo;
+        }
+    
+        //Filtro por categoria
+        if (id_categoria) {
+            filtros.id_categoria = id_categoria;
+        }
+    
+        //Filtro por rango de fechas
+        if (fechaInicio || fechaFin) {
+            filtros.fecha = {};
+            if (fechaInicio) {
+            filtros.fecha[Op.gte] = new Date(fechaInicio);
+        }
+        if (fechaFin) {
+            filtros.fecha[Op.lte] = new Date(fechaFin);
+        }
+        }
+    
+        const transacciones = await Transaccion.findAll({
+            where: filtros,
+            include: [
+            { model: Categoria, as: "categoria", attributes: ["nombre_categoria"] },
+            ],
+            order: [["fecha", "DESC"]],
+        });
+        res.json(transacciones);
+        } catch (error) {
+        res
+            .status(500)
+            .json({ error: "Error al obtener el historial de transacciones." });
+        }
+    };
+    
+const obtenerPorCategoria = async (req, res) => {
+    try {
+        const { id_usuario } = req.params;
+        const { id_categoria } = req.query; // El sistema o Postman va a mandar esto (?id_categoria=X)
 
+        let filtros = { id_usuario };
+        
+        // Si mandan una categoría específica, la agregamos a los filtros
+        if (id_categoria) {
+            filtros.id_categoria = id_categoria;
+        }
+
+        const transacciones = await Transaccion.findAll({
+            where: filtros,
+            // Incluimos la categoría para que en cada fila veas reflejado su nombre
+            include: [{ model: Categoria, as: "categoria", attributes: ["nombre_categoria"] }],
+            order: [["fecha", "DESC"]] // Ordenadas de la más nueva a la más vieja
+        });
+
+        res.json(transacciones);
+    } catch (error) {
+        res.status(500).json({
+            error: "Error al obtener transacciones por categoría.",
+            detalle_del_error: error.message,
+        });
+    }
+};
+
+const obtenerPorTipo = async (req, res) => {
+    try {
+        const { id_usuario } = req.params;
+        const { tipo } = req.query; // El sistema o Postman va a mandar esto
+
+        let filtros = { id_usuario };
+        
+        // Si mandamos el tipo (?tipo=gasto), lo agregamos al filtro de búsqueda
+        if (tipo) {
+            filtros.tipo = tipo;
+        }
+
+        const transacciones = await Transaccion.findAll({
+            where: filtros,
+            // Incluimos la categoría para que en la lista sepas en qué fue el gasto/ingreso
+            include: [{ model: Categoria, as: "categoria", attributes: ["nombre_categoria"] }], 
+            order: [["fecha", "DESC"]] // Ordenamos del más reciente al más viejo
+        });
+
+        res.json(transacciones);
+    } catch (error) {
+        res.status(500).json({ 
+            error: "Error al obtener transacciones por tipo.",
+            detalle_del_error: error.message 
+        });
+    }
+};
 module.exports = {
-    crearTransaccion
+    crearTransaccion,
+    obtenerHistorial,
+    obtenerPorCategoria,
+    obtenerPorTipo
 };
