@@ -144,9 +144,33 @@ const obtenerPorTipo = async (req, res) => {
         });
     }
 };
+
+const actualizarTransaccion = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Buscamos si la transacción existe
+        const transaccion = await Transaccion.findByPk(id);
+        
+        if (!transaccion) {
+            return res.status(404).json({ error: "Transacción no encontrada" });
+        }
+
+        await transaccion.update(req.body);
+
+        res.status(200).json({ 
+            msg: "Transacción actualizada correctamente",
+            transaccion 
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Error al actualizar la transacción" });
+    }
+};
+
 module.exports = {
     crearTransaccion,
     obtenerHistorial,
     obtenerPorCategoria,
-    obtenerPorTipo
+    obtenerPorTipo,
+    actualizarTransaccion
 };
