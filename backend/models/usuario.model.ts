@@ -2,10 +2,10 @@ import { DataTypes, Model } from 'sequelize';
 const { sequelize } = require('./index.model');
 
 class Usuario extends Model {
-    public id_usuario!: number;
-    public nombre!: string;
-    public email!: string;
-    public contrasena!: string;
+    declare id_usuario: number;
+    declare nombre: string;
+    declare email: string;
+    declare contrasena: string;
 }
 
 Usuario.init(
