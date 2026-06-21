@@ -46,6 +46,7 @@ const crearTransaccion = async (req, res) => {
         });
     }
 };
+
 const obtenerHistorial = async (req, res) => {
     try {
         const { id_usuario } = req.params;
@@ -87,8 +88,8 @@ const obtenerHistorial = async (req, res) => {
             .status(500)
             .json({ error: "Error al obtener el historial de transacciones." });
         }
-    };
-    
+};
+
 const obtenerPorCategoria = async (req, res) => {
     try {
         const { id_usuario } = req.params;
@@ -167,10 +168,37 @@ const actualizarTransaccion = async (req, res) => {
     }
 };
 
+// Eliminar Transaccion
+const eliminarTransaccion = async (req, res) => {
+    try {
+        const {id} = req.params;
+
+        // validamos si la transacción existe
+        const transaccion = await Transaccion.findByPk(id);
+
+        if (!transaccion) {
+            return res.status(404).json({ error: "Transacción no encontrada" });
+        }
+
+        await transaccion.destroy(); // borrado fisico
+
+        res.status(200).json({ 
+            msg: `La transacción con ID ${id} eliminada correctamente` 
+        });
+
+    } catch (error) {
+        res.status(500).json({ 
+            error: "Error al eliminar la transacción", 
+            details: error.message 
+        });
+    }
+};
+
 module.exports = {
     crearTransaccion,
     obtenerHistorial,
     obtenerPorCategoria,
     obtenerPorTipo,
-    actualizarTransaccion
+    actualizarTransaccion,
+    eliminarTransaccion
 };
