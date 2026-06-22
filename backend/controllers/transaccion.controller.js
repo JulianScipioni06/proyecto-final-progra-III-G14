@@ -88,25 +88,25 @@ const obtenerHistorial = async (req, res) => {
             .status(500)
             .json({ error: "Error al obtener el historial de transacciones." });
         }
-};
-
+    };
+    
+// método para obtener transacciones por categoría
 const obtenerPorCategoria = async (req, res) => {
     try {
         const { id_usuario } = req.params;
-        const { id_categoria } = req.query; // El sistema o Postman va a mandar esto (?id_categoria=X)
+        const { id_categoria } = req.query;
 
         let filtros = { id_usuario };
         
-        // Si mandan una categoría específica, la agregamos a los filtros
+        // Filtramos por categoria si es necesario.
         if (id_categoria) {
             filtros.id_categoria = id_categoria;
         }
 
         const transacciones = await Transaccion.findAll({
             where: filtros,
-            // Incluimos la categoría para que en cada fila veas reflejado su nombre
             include: [{ model: Categoria, as: "categoria", attributes: ["nombre_categoria"] }],
-            order: [["fecha", "DESC"]] // Ordenadas de la más nueva a la más vieja
+            order: [["fecha", "DESC"]] // Ordenadas desde la mas reciente.
         });
 
         res.json(transacciones);
@@ -118,23 +118,23 @@ const obtenerPorCategoria = async (req, res) => {
     }
 };
 
+// método para obtener transacciones por tipo (ingreso o gasto)
 const obtenerPorTipo = async (req, res) => {
     try {
         const { id_usuario } = req.params;
-        const { tipo } = req.query; // El sistema o Postman va a mandar esto
+        const { tipo } = req.query; 
 
         let filtros = { id_usuario };
         
-        // Si mandamos el tipo (?tipo=gasto), lo agregamos al filtro de búsqueda
+        // Filtramos por tipo si es necesario.
         if (tipo) {
             filtros.tipo = tipo;
         }
 
         const transacciones = await Transaccion.findAll({
             where: filtros,
-            // Incluimos la categoría para que en la lista sepas en qué fue el gasto/ingreso
             include: [{ model: Categoria, as: "categoria", attributes: ["nombre_categoria"] }], 
-            order: [["fecha", "DESC"]] // Ordenamos del más reciente al más viejo
+            order: [["fecha", "DESC"]] // Ordenadas desde la mas reciente.
         });
 
         res.json(transacciones);
