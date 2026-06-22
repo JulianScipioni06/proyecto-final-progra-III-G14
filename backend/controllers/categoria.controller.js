@@ -53,13 +53,11 @@ const actualizarCategoria = async (req, res) => {
             return res.status(400).json({ msg: 'El nombre de la categoría es obligatorio' });
         }
 
-        // CAMBIO ACÁ: Usamos categoriaEncontrada en lugar de categoria
         const categoriaEncontrada = await categoria.findByPk(id);
         if (!categoriaEncontrada) {
             return res.status(404).json({ msg: 'Categoría no encontrada' });
         }
 
-        // Control de duplicados
         const categoriaDuplicada = await categoria.findOne({
             where: {
                 nombre_categoria: { [Op.iLike]: nombre_categoria },
@@ -71,7 +69,6 @@ const actualizarCategoria = async (req, res) => {
             return res.status(400).json({ msg: 'Ya existe otra categoría con ese nombre' });
         }
 
-        // CAMBIO ACÁ: Actualizamos y guardamos usando la nueva variable
         categoriaEncontrada.nombre_categoria = nombre_categoria;
         await categoriaEncontrada.save();
 
@@ -91,13 +88,11 @@ const eliminarCategoria = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // CAMBIO ACÁ: Usamos categoriaEncontrada en lugar de categoria
         const categoriaEncontrada = await categoria.findByPk(id);
         if (!categoriaEncontrada) {
             return res.status(404).json({ msg: 'Categoría no encontrada' });
         }
 
-        // CAMBIO ACÁ: Eliminamos usando la nueva variable
         await categoriaEncontrada.destroy();
 
         return res.status(200).json({ msg: 'Categoría eliminada correctamente' });
