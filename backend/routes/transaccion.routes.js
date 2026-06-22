@@ -1,17 +1,16 @@
 const { Router } = require('express');
 const router = Router();
+const { validarJWT } = require('../middleware/validar-jwt.middleware');
 
-// Acá los chicos del equipo van a ir metiendo los endpoints
-// router.get('/', obtenerTodos);
+const { crearTransaccion ,obtenerHistorial, obtenerPorCategoria , obtenerPorTipo, actualizarTransaccion, eliminarTransaccion, obtenerBalance } = require('../controllers/transaccion.controller');
 
-const { crearTransaccion ,obtenerHistorial, obtenerPorCategoria , obtenerPorTipo, actualizarTransaccion, eliminarTransaccion } = require('../controllers/transaccion.controller');
-
-router.post('/', crearTransaccion);
-router.get('/:id_usuario/historial', obtenerHistorial);
-router.get('/:id_usuario/por-categoria', obtenerPorCategoria);
-router.get('/:id_usuario/por-tipo', obtenerPorTipo);
-router.put('/:id', actualizarTransaccion);
-router.delete('/:id', eliminarTransaccion);
+router.post('/', validarJWT, crearTransaccion);
+router.get('/:id_usuario/historial', validarJWT, obtenerHistorial);
+router.get('/:id_usuario/por-categoria', validarJWT, obtenerPorCategoria);
+router.get('/:id_usuario/por-tipo', validarJWT, obtenerPorTipo);
+router.get('/:id_usuario/balance', validarJWT, obtenerBalance);
+router.put('/:id', validarJWT, actualizarTransaccion);
+router.delete('/:id', validarJWT, eliminarTransaccion);
 
 
 module.exports = router;

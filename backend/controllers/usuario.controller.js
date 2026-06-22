@@ -1,8 +1,10 @@
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const Usuario = require('../models/usuario.model');
 
 const registrarUsuario = async (req, res) => {
     try{
-        const{nombre, apellido, email, contrasena} = req.body;
+        const{nombre, email, contrasena} = req.body;
 
         // comprobamos si el email ya existe en la base de datos
         const usuarioExistente = await Usuario.findOne({where: {email}});
@@ -12,12 +14,15 @@ const registrarUsuario = async (req, res) => {
             });
         }
 
-        // creamos el usuario
+        // Generamos el hash de la contraseña
+        const salt = bcrypt.genSaltSync(10);
+        const contrasenaHasheada = bcrypt.hashSync(contrasena, salt);
+
+        // Creamos el usuario (acordate de pasarle la hasheada, no la original)
         const nuevoUsuario = await Usuario.create({
             nombre,
-            apellido,
             email,
-            contrasena 
+            contrasena: contrasenaHasheada 
         });
 
         // respondemos excluyendo la contraseña
@@ -26,7 +31,6 @@ const registrarUsuario = async (req, res) => {
             usuario: {
                 id_usuario: nuevoUsuario.id_usuario,
                 nombre: nuevoUsuario.nombre,
-                apellido: nuevoUsuario.apellido,
                 email: nuevoUsuario.email
             }
         });
@@ -53,20 +57,29 @@ const loginUsuario = async (req, res) =>{
         }
 
         // comparamos las contraseñas
-        if(usuario.contrasena !== contrasena){
+        // comparamos las contraseñas con bcrypt
+        const passwordValido = bcrypt.compareSync(contrasena, usuario.contrasena);
+        if(!passwordValido){
             return res.status(401).json({
                 msg: 'Credenciales inválidas (Contraseña incorrecta).'
             });
         }
 
-        // login exitoso
+        // Generamos el token JWT
+        const payload = { id_usuario: usuario.id_usuario };
+        const token = jwt.sign(payload, process.env.SECRET_KEY || 'TU_PALABRA_SECRETA', {
+            expiresIn: '4h' // El token dura 4 horas
+        });
+
+        // login exitoso (devolvemos el token al frontend)
         return res.status(200).json({
             msg: 'Inicio de sesión exitoso',
             usuario:{
                 id_usuario: usuario.id_usuario,
                 nombre: usuario.nombre,
                 email: usuario.email
-            }
+            },
+            token 
         });
         
     } catch (error){
@@ -80,7 +93,7 @@ const loginUsuario = async (req, res) =>{
 const actualizarUsuario = async(req, res) => {
     try{
         const {id_usuario} = req.params;
-        const {nombre, apellido, email, contrasena} = req.body;
+        const {nombre, email, contrasena} = req.body;
 
         // busca el usuario por su clave primaria
         const usuario = await Usuario.findByPk(id_usuario);
@@ -97,19 +110,23 @@ const actualizarUsuario = async(req, res) => {
             }
         }
 
+        let contrasenaNueva = usuario.contrasena; 
+        if (contrasena) {
+            const salt = bcrypt.genSaltSync(10);
+            contrasenaNueva = bcrypt.hashSync(contrasena, salt);
+        }
+
         // actualizamos los datos, usamos OR para mantener el dato viejo si no nos envian nada
         await usuario.update({
             nombre: nombre || usuario.nombre,
-            apellido: apellido || usuario.apellido,
             email: email || usuario.email,
-            contrasena: contrasena || usuario.contrasena
+            contrasena: contrasenaNueva
         });
         return res.status(200).json({
             msg: 'Usuario actualizado con éxito.',
             usuario: {
                 id_usuario: usuario.id_usuario,
                 nombre: usuario.nombre,
-                apellido: usuario.apellido,
                 email: usuario.email
             }
         });

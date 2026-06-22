@@ -194,11 +194,52 @@ const eliminarTransaccion = async (req, res) => {
     }
 };
 
+// Obtener Balance Actual
+const obtenerBalance = async (req, res) => {
+    try {
+        const { id_usuario } = req.params;
+        
+        // Buscamos todas las transacciones de ese usuario
+        const transacciones = await Transaccion.findAll({ 
+            where: { id_usuario } 
+        });
+
+        let totalIngresos = 0;
+        let totalGastos = 0;
+
+        // Recorremos y sumamos según el tipo
+        transacciones.forEach(t => {
+            const monto = parseFloat(t.monto);
+            if (t.tipo === 'ingreso') {
+                totalIngresos += monto;
+            } else if (t.tipo === 'gasto') {
+                totalGastos += monto;
+            }
+        });
+
+        const balanceActual = totalIngresos - totalGastos;
+
+        res.status(200).json({
+            id_usuario,
+            totalIngresos,
+            totalGastos,
+            balanceActual
+        });
+
+    } catch (error) {
+        console.error("Error al obtener el balance:", error);
+        res.status(500).json({ 
+            error: "Error interno al calcular el balance del usuario." 
+        });
+    }
+};
+
 module.exports = {
     crearTransaccion,
     obtenerHistorial,
     obtenerPorCategoria,
     obtenerPorTipo,
     actualizarTransaccion,
-    eliminarTransaccion
+    eliminarTransaccion,
+    obtenerBalance
 };

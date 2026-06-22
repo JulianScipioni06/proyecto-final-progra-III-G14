@@ -1,11 +1,9 @@
 const { Router } = require('express');
 const router = Router();
 const {crearCategoria, listarCategorias} = require ('../controllers/categoria.controller');
+const {validarJWT} = require('../middleware/validar-jwt.middleware')
 
-router.get('/', listarCategorias);
-router.post('/', crearCategoria);
-
-// Acá los chicos del equipo van a ir metiendo los endpoints
-// router.get('/', obtenerTodos);
+router.get('/', validarJWT, listarCategorias);
+router.post('/', validarJWT, crearCategoria);
 
 module.exports = router;
