@@ -1,3 +1,4 @@
+const {Op} = require('sequelize');
 const categoria = require('../models/categoria.model');
 
 const crearCategoria = async (req , res) => {
@@ -8,6 +9,22 @@ const crearCategoria = async (req , res) => {
             return res.status(400).json ({
                 mensaje: `debe poner un nombre de categoria`});
         }
+
+        // validamos que no se dupliquen las categorias
+        const categoriaExiste = await categoria.findOne({
+            where: {
+                nombre_categoria: {
+                    [Op.iLike]: nombre_categoria
+                    }
+                }
+        });
+
+        if (categoriaExiste) {
+            return res.status(400).json({
+                mensaje: 'La categoría ya existe'
+            });
+        }
+
         const nueva = await categoria.create ({nombre_categoria});
         res.status(201).json(nueva);
     }catch (error){
@@ -22,7 +39,7 @@ const listarCategorias = async (req , res) =>{
         const categorias = await categoria.findAll();
         res.status(200).json(categorias)
     }catch (error){
-        res.status(500).json({mensaje:`eroor al listar las categorias`, error: error.message});
+        res.status(500).json({mensaje:`error al listar las categorias`, error: error.message});
     }
 };
 

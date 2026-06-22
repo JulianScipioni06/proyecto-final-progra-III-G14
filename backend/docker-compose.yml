@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # 1. El contenedor de la Base de Datos (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: progra3_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rootpassword # Cambialo si querés
+      POSTGRES_DB: controldegastos
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # 2. El contenedor de tu Backend (Node.js)
+  backend:
+    build: .
+    container_name: progra3_backend
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      # Esta URL conecta tu backend al contenedor 'db' de arriba en lugar de usar Neon
+      - DATABASE_URL=postgres://postgres:rootpassword@db:5432/controldegastos
+      - SECRET_KEY=TU_PALABRA_SECRETA # La que vayas a usar para JWT
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
