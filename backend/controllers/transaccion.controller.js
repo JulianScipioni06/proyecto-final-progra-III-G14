@@ -88,25 +88,25 @@ const obtenerHistorial = async (req, res) => {
             .status(500)
             .json({ error: "Error al obtener el historial de transacciones." });
         }
-};
-
+    };
+    
+// método para obtener transacciones por categoría
 const obtenerPorCategoria = async (req, res) => {
     try {
         const { id_usuario } = req.params;
-        const { id_categoria } = req.query; // El sistema o Postman va a mandar esto (?id_categoria=X)
+        const { id_categoria } = req.query;
 
         let filtros = { id_usuario };
         
-        // Si mandan una categoría específica, la agregamos a los filtros
+        // Filtramos por categoria si es necesario.
         if (id_categoria) {
             filtros.id_categoria = id_categoria;
         }
 
         const transacciones = await Transaccion.findAll({
             where: filtros,
-            // Incluimos la categoría para que en cada fila veas reflejado su nombre
             include: [{ model: Categoria, as: "categoria", attributes: ["nombre_categoria"] }],
-            order: [["fecha", "DESC"]] // Ordenadas de la más nueva a la más vieja
+            order: [["fecha", "DESC"]] // Ordenadas desde la mas reciente.
         });
 
         res.json(transacciones);
@@ -118,23 +118,23 @@ const obtenerPorCategoria = async (req, res) => {
     }
 };
 
+// método para obtener transacciones por tipo (ingreso o gasto)
 const obtenerPorTipo = async (req, res) => {
     try {
         const { id_usuario } = req.params;
-        const { tipo } = req.query; // El sistema o Postman va a mandar esto
+        const { tipo } = req.query; 
 
         let filtros = { id_usuario };
         
-        // Si mandamos el tipo (?tipo=gasto), lo agregamos al filtro de búsqueda
+        // Filtramos por tipo si es necesario.
         if (tipo) {
             filtros.tipo = tipo;
         }
 
         const transacciones = await Transaccion.findAll({
             where: filtros,
-            // Incluimos la categoría para que en la lista sepas en qué fue el gasto/ingreso
             include: [{ model: Categoria, as: "categoria", attributes: ["nombre_categoria"] }], 
-            order: [["fecha", "DESC"]] // Ordenamos del más reciente al más viejo
+            order: [["fecha", "DESC"]] // Ordenadas desde la mas reciente.
         });
 
         res.json(transacciones);
@@ -196,30 +196,24 @@ const eliminarTransaccion = async (req, res) => {
 
 // Obtener Balance Actual
 const obtenerBalance = async (req, res) => {
+    const { id_usuario } = req.params;
+
     try {
-        const { id_usuario } = req.params;
-        
-        // Buscamos todas las transacciones de ese usuario
-        const transacciones = await Transaccion.findAll({ 
-            where: { id_usuario } 
-        });
+        // Forzamos que el ID sea un número para que PostgreSQL lo entienda perfecto
+        const idNum = parseInt(id_usuario, 10);
 
-        let totalIngresos = 0;
-        let totalGastos = 0;
+        // Asegurate de que 'ingreso' y 'gasto' estén 100% en minúsculas
+        const totalIngresos = await Transaccion.sum('monto', { 
+            where: { id_usuario: idNum, tipo: 'ingreso' } 
+        }) || 0;
 
-        // Recorremos y sumamos según el tipo
-        transacciones.forEach(t => {
-            const monto = parseFloat(t.monto);
-            if (t.tipo === 'ingreso') {
-                totalIngresos += monto;
-            } else if (t.tipo === 'gasto') {
-                totalGastos += monto;
-            }
-        });
+        const totalGastos = await Transaccion.sum('monto', { 
+            where: { id_usuario: idNum, tipo: 'gasto' } 
+        }) || 0;
 
         const balanceActual = totalIngresos - totalGastos;
 
-        res.status(200).json({
+        res.json({
             id_usuario,
             totalIngresos,
             totalGastos,
@@ -227,10 +221,8 @@ const obtenerBalance = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error al obtener el balance:", error);
-        res.status(500).json({ 
-            error: "Error interno al calcular el balance del usuario." 
-        });
+        console.log(error);
+        res.status(500).json({ msg: 'Error al calcular el balance' });
     }
 };
 
