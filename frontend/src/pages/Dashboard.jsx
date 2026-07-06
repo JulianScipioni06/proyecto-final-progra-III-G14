@@ -15,8 +15,21 @@ export default function Dashboard({ onLogout }) {
     useEffect(() => {
     const obtenerDatos = async () => {
         try {
-            const idUsuario = 11;
+
             const token =localStorage.getItem("token");
+            // Verificamos si el token existe antes de continuar
+
+            if (!token) return; // Si no hay token, no hacemos la solicitud
+
+            const payloadCodificado = token.split('.')[1];
+            // Decodificamos el token para obtener el id del usuario.
+            const datosToken = JSON.parse(atob(payloadCodificado));
+            const idUsuario = datosToken.uid || datosToken.id || datosToken.id_usuario;
+
+            if (!idUsuario) {
+                console.error("No se pudo obtener el ID del usuario del token.");
+                return;
+            }
 
             const respuesta = await api.get(`/transacciones/${idUsuario}/balance`, {
                     headers: {
