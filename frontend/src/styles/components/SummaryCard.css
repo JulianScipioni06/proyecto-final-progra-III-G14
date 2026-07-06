@@ -1,0 +1,113 @@
+
+    .summary-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); 
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+    flex: 1; 
+    min-width: 250px;
+    }
+
+    .summary-card.main {
+    background: linear-gradient(135deg, #2563eb, #3b82f6); 
+    color: white;
+    }
+
+    
+    .summary-card .card-title {
+    font-size: 0.85rem;
+    text-transform: uppercase; 
+    font-weight: 600;
+    color: #6b7280; 
+    margin: 0;
+    }
+
+    
+    .summary-card .card-amount {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #1f2937; 
+    margin: 0 0 8px 0;
+    }
+
+    
+    .summary-card .card-subtitle {
+    font-size: 0.85rem;
+    color: #9ca3af; 
+    margin: 0;
+    font-weight: 500;
+    }
+
+    
+
+    
+    .summary-card.main .card-title,
+    .summary-card.main .card-amount,
+    .summary-card.main .card-subtitle {
+    color: #ffffff;
+    }
+
+    
+    .summary-card.income .card-subtitle {
+    color: #10b981; 
+    }
+
+    .summary-card.expense .card-subtitle {
+    color: #ef4444; 
+    }
+
+    .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    }
+
+    
+    .card-icon-container {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+
+    .summary-card.income .card-icon-container {
+    background-color: #d1fae5;
+    color: #10b981;
+    }
+
+    .summary-card.expense .card-icon-container {
+    background-color: #fee2e2;
+    color: #ef4444;
+    }
+
+    .summary-card.main {
+    position: relative;
+    overflow: hidden; 
+    }
+
+    .summary-card.main::before,
+    .summary-card.main::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    }
+
+    .summary-card.main::before {
+    width: 150px;
+    height: 150px;
+    right: -30px;
+    top: -50px;
+    }
+
+    .summary-card.main::after {
+    width: 250px;
+    height: 250px;
+    right: -80px;
+    bottom: -80px;
+    }
