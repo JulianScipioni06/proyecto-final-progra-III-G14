@@ -3,6 +3,7 @@ import api from "../services/api";
 import Navbar from "../components/Navbar";
 import "../styles/pages/Dashboard.css";
 import SummaryCard from "../components/SummaryCard";
+import TransaccionesList from "../components/TransaccionesList";
 
 export default function Dashboard({ onLogout }) {
   //Arrancamos los datos en cero, Hasta que la API nos devuelva los datos reales.
@@ -11,6 +12,7 @@ export default function Dashboard({ onLogout }) {
         ingresos: 0,
         gastos: 0,
     });
+    const [transacciones, setTransacciones] = useState([]);
 
     useEffect(() => {
     const obtenerDatos = async () => {
@@ -88,6 +90,7 @@ export default function Dashboard({ onLogout }) {
                         type="expense" 
                     />
                 </section>
+                <TransaccionesList transacciones={transacciones} />
         </main>
         </div>
     );
