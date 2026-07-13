@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import "../styles/pages/Dashboard.css";
 import SummaryCard from "../components/SummaryCard";
 import TransaccionesList from "../components/TransaccionesList";
+import ExpensesCard from "../components/ExpensesCard";
 
 export default function Dashboard({ onLogout }) {
   //Arrancamos los datos en cero, Hasta que la API nos devuelva los datos reales.
@@ -60,6 +61,15 @@ export default function Dashboard({ onLogout }) {
         year: "numeric",
     });
 
+    const expensesData = [
+        {id: 1, name: 'Alimentación', value: 18500, color: '#2563eb'},
+        {id: 2, name: 'Transporte', value: 9200, color: '#10b981'},
+        {id: 3, name: 'Vivienda', value: 35000, color: '#f59e0b'},
+        {id: 4, name: 'Entretenimiento', value: 4500, color:'#ec4899'},
+        {id: 5, name: 'Salud', value: 7800, color: '#8b5cf6'},
+        {id: 6, name: 'Ropa', value: 3200, color: '#06b6d4'},
+    ];
+
     return (
     <div className="dashboard-container">
         <Navbar onLogout={onLogout} />
@@ -89,6 +99,9 @@ export default function Dashboard({ onLogout }) {
                         subtitle="Total gastado" 
                         type="expense" 
                     />
+                </section>
+                <section className="dashboard-content-section">
+                    <ExpensesCard data={expensesData}/>
                 </section>
                 <TransaccionesList transacciones={transacciones} />
         </main>
