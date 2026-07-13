@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import "../styles/pages/Dashboard.css";
 import SummaryCard from "../components/SummaryCard";
 import TransaccionesList from "../components/TransaccionesList";
+import FormularioTransaccion from "../components/FormularioTransaccion";
 
 export default function Dashboard({ onLogout }) {
   //Arrancamos los datos en cero, Hasta que la API nos devuelva los datos reales.
@@ -13,6 +14,7 @@ export default function Dashboard({ onLogout }) {
         gastos: 0,
     });
     const [transacciones, setTransacciones] = useState([]);
+    const [modalAbierto, setModalAbierto] = useState(false);
 
     useEffect(() => {
     const obtenerDatos = async () => {
@@ -67,6 +69,7 @@ export default function Dashboard({ onLogout }) {
             <div className="dashboard-header-text">
             <h1 className="dashboard-title">Resumen general</h1>
             <p className="dashboard-date">{fechaActual}</p>
+            <button className="btn-nueva-transaccion" onClick={() => setModalAbierto(true)}>Nueva transacción</button>
             </div>
 
             <section className="dashboard-cards-section">
@@ -92,6 +95,13 @@ export default function Dashboard({ onLogout }) {
                 </section>
                 <TransaccionesList transacciones={transacciones} />
         </main>
+
+        <FormularioTransaccion 
+            isOpen={modalAbierto}
+            onClose={() => setModalAbierto(false)}
+            onTransactionAdded={() => window.location.reload()} 
+        />
+  
         </div>
     );
 }
