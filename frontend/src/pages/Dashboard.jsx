@@ -3,6 +3,7 @@ import api from "../services/api";
 import Navbar from "../components/Navbar";
 import "../styles/pages/Dashboard.css";
 import SummaryCard from "../components/SummaryCard";
+import TransaccionesList from "../components/TransaccionesList";
 import ExpensesCard from "../components/ExpensesCard";
 
 export default function Dashboard({ onLogout }) {
@@ -12,6 +13,7 @@ export default function Dashboard({ onLogout }) {
         ingresos: 0,
         gastos: 0,
     });
+    const [transacciones, setTransacciones] = useState([]);
 
     useEffect(() => {
     const obtenerDatos = async () => {
@@ -101,6 +103,7 @@ export default function Dashboard({ onLogout }) {
                 <section className="dashboard-content-section">
                     <ExpensesCard data={expensesData}/>
                 </section>
+                <TransaccionesList transacciones={transacciones} />
         </main>
         </div>
     );
