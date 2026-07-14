@@ -35,7 +35,7 @@ export default function FormularioTransaccion({ isOpen, onClose, onTransactionAd
       };
 
       //Petición POST 
-      const respuesta = await api.post('/transacciones', nuevaTransaccion, {
+      const respuesta = await api.post('/transaccion', nuevaTransaccion, {
         headers: {
           'x-token': token
         }
