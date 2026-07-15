@@ -6,6 +6,16 @@ import SummaryCard from "../components/SummaryCard";
 import TransaccionesList from "../components/TransaccionesList";
 import ExpensesCard from "../components/ExpensesCard";
 
+const colores_categorias = {
+    'Alimentacion': '#2563eb',
+    'Transporte': '#10b981',
+    'Vivienda': '#f59e0b',
+    'Entretenimiento': '#ec4899',
+    'Salud': '#8b5cf6',
+    'Ropa': '#06b6d4',
+    'Otros': '#64748b' //por si viene alguna categoria q no mapeamos
+}
+
 export default function Dashboard({ onLogout }) {
   //Arrancamos los datos en cero, Hasta que la API nos devuelva los datos reales.
     const [datosFinancieros, setDatosFinancieros] = useState({
@@ -14,16 +24,15 @@ export default function Dashboard({ onLogout }) {
         gastos: 0,
     });
     const [transacciones, setTransacciones] = useState([]);
+    const [gastosPorCategoria, setGastosPorCategoria] = useState([]);
 
     useEffect(() => {
     const obtenerDatos = async () => {
         try {
-
             const token =localStorage.getItem("token");
             // Verificamos si el token existe antes de continuar
 
             if (!token) return; // Si no hay token, no hacemos la solicitud
-
             const payloadCodificado = token.split('.')[1];
             // Decodificamos el token para obtener el id del usuario.
             const datosToken = JSON.parse(atob(payloadCodificado));
@@ -34,19 +43,37 @@ export default function Dashboard({ onLogout }) {
                 return;
             }
 
+            //balance, ingresos y gastos totales
             const respuesta = await api.get(`/transacciones/${idUsuario}/balance`, {
                     headers: {
                         'x-token': token 
                     }
                 });
             
-
             setDatosFinancieros({
             balance: respuesta.data.balanceActual,
             ingresos: respuesta.data.totalIngresos,
             gastos: respuesta.data.totalGastos,
             
         });
+            //treamos los gastos agrupados por categoria en el back
+            const respuestaCategorias = await api.get(`/transacciones/${idUsuario}/por-categoria`,{
+                headers: {'x-token': token}
+            });
+            console.log("DATOS DEL BACKEND PARA EL GRAFICO: ", respuestaCategorias.data);
+            //trasnformamos los datos del back al formato que necesita el grafico, añadiendo los colores
+            const datosFormateados = respuestaCategorias.data.map((item,index) => {
+                const nombreCategoria = item.categoria?.nombre_categoria || item.nombre_categoria || 'Desconocido';
+                return{
+                    id: index,
+                    name: nombreCategoria,
+                    value: Number(item.monto),
+                    color: colores_categorias[nombreCategoria] || colores_categorias['Otros']
+                };
+            }); 
+            
+            setGastosPorCategoria(datosFormateados);
+
         } catch (error) {
         console.error("Error al obtener los datos financieros:", error);
         }
@@ -60,15 +87,6 @@ export default function Dashboard({ onLogout }) {
         month: "long",
         year: "numeric",
     });
-
-    const expensesData = [
-        {id: 1, name: 'Alimentación', value: 18500, color: '#2563eb'},
-        {id: 2, name: 'Transporte', value: 9200, color: '#10b981'},
-        {id: 3, name: 'Vivienda', value: 35000, color: '#f59e0b'},
-        {id: 4, name: 'Entretenimiento', value: 4500, color:'#ec4899'},
-        {id: 5, name: 'Salud', value: 7800, color: '#8b5cf6'},
-        {id: 6, name: 'Ropa', value: 3200, color: '#06b6d4'},
-    ];
 
     return (
     <div className="dashboard-container">
@@ -101,7 +119,7 @@ export default function Dashboard({ onLogout }) {
                     />
                 </section>
                 <section className="dashboard-content-section">
-                    <ExpensesCard data={expensesData}/>
+                    <ExpensesCard data={gastosPorCategoria}/>
                 </section>
                 <TransaccionesList transacciones={transacciones} />
         </main>

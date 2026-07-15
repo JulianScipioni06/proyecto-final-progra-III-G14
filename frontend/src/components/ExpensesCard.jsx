@@ -17,6 +17,29 @@ const DonutChart = ({data, total, hoveredItem, setHoveredItem}) => {
     const centerLabel = hoveredItem ? hoveredItem.name.toUpperCase(): 'TOTAL GASTADO';
     const centerValue = hoveredItem ? hoveredItem.value: total;
 
+    // no hay gastos registrados en la base de datos
+    if(total === 0){
+        return (
+            <div className='chart-container'>
+                <svg viewBox='0 0 42 42' className='donut-svg'>
+                    <circle
+                        cx='21'
+                        cy='21'
+                        r='15.9155'
+                        fill='transparent'
+                        stroke='#e2e8f0'
+                        strokeWidth='2.5'
+                    />
+                </svg>
+                <div className='donut-center-text'>
+                    <span className='chart-label'>SIN GASTOS</span>
+                    <span className='chart-total'>$0,00</span>
+                </div>
+            </div>
+        );
+    };
+
+    // si hay gastos, el componente funciona normalmente
     return(
     <div className="chart-container">
         <svg viewBox="0 0 42 42" className="donut-svg">
@@ -54,7 +77,6 @@ const DonutChart = ({data, total, hoveredItem, setHoveredItem}) => {
 };
 
 // fila de lista de categorias
-
 const LegendItem = ({item, hoveredItem, setHoveredItem}) => {
     const formatCurrency = (val) => {
         return new Intl.NumberFormat('es-AR', {
