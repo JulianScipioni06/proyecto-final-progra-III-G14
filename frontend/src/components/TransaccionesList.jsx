@@ -5,7 +5,14 @@ import '../styles/components/TransaccionesList.css';
 export default function TransaccionesList({ transacciones = [] }) {
     const [verTodas, setVerTodas] = useState(false);
 
-    const transaccionesAMostrar = verTodas ? transacciones : transacciones.slice(0, 3);
+    const hace5Dias = new Date();
+    hace5Dias.setDate(hace5Dias.getDate() - 5);
+
+    const transaccionesRecientes = transacciones.filter(
+        t => new Date(t.fecha) >= hace5Dias
+    );
+
+    const transaccionesAMostrar = verTodas ? transaccionesRecientes : transaccionesRecientes.slice(0, 3);
 
     return (
         <div className="transacciones-lista-card">
@@ -13,7 +20,7 @@ export default function TransaccionesList({ transacciones = [] }) {
                 <h3 className="transacciones-lista-titulo">Ultimas transacciones</h3>
             </div>
 
-            {transacciones.length === 0 ? (
+            {transaccionesRecientes.length === 0 ? (
                 <p className="transacciones-lista-empty">No hay transacciones recientes.</p>
             ) : (
                 <>
@@ -41,11 +48,10 @@ export default function TransaccionesList({ transacciones = [] }) {
                         ))}
                     </ul>
 
-                    {transacciones.length > 3 && (
+                    {transaccionesRecientes.length > 3 && (
                         <button
                             className="transacciones-lista-btn"
-                            onClick={() => setVerTodas(!verTodas)}
-                        >
+                            onClick={() => setVerTodas(!verTodas)}>
                             {verTodas ? 'Ver menos' : 'Ver todas las transacciones'}
                         </button>
                     )}
