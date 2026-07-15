@@ -5,6 +5,17 @@ import "../styles/pages/Dashboard.css";
 import SummaryCard from "../components/SummaryCard";
 import TransaccionesList from "../components/TransaccionesList";
 import FormularioTransaccion from "../components/FormularioTransaccion";
+import ExpensesCard from "../components/ExpensesCard";
+
+const colores_categorias = {
+    'Alimentacion': '#2563eb',
+    'Transporte': '#10b981',
+    'Vivienda': '#f59e0b',
+    'Entretenimiento': '#ec4899',
+    'Salud': '#8b5cf6',
+    'Ropa': '#06b6d4',
+    'Otros': '#64748b' //por si viene alguna categoria q no mapeamos
+}
 
 export default function Dashboard({ onLogout }) {
   //Arrancamos los datos en cero, Hasta que la API nos devuelva los datos reales.
@@ -15,16 +26,15 @@ export default function Dashboard({ onLogout }) {
     });
     const [transacciones, setTransacciones] = useState([]);
     const [modalAbierto, setModalAbierto] = useState(false);
+    const [gastosPorCategoria, setGastosPorCategoria] = useState([]);
 
     useEffect(() => {
     const obtenerDatos = async () => {
         try {
-
             const token =localStorage.getItem("token");
             // Verificamos si el token existe antes de continuar
 
             if (!token) return; // Si no hay token, no hacemos la solicitud
-
             const payloadCodificado = token.split('.')[1];
             // Decodificamos el token para obtener el id del usuario.
             const datosToken = JSON.parse(atob(payloadCodificado));
@@ -35,19 +45,37 @@ export default function Dashboard({ onLogout }) {
                 return;
             }
 
+            //balance, ingresos y gastos totales
             const respuesta = await api.get(`/transacciones/${idUsuario}/balance`, {
                     headers: {
                         'x-token': token 
                     }
                 });
             
-
             setDatosFinancieros({
             balance: respuesta.data.balanceActual,
             ingresos: respuesta.data.totalIngresos,
             gastos: respuesta.data.totalGastos,
             
         });
+            //treamos los gastos agrupados por categoria en el back
+            const respuestaCategorias = await api.get(`/transacciones/${idUsuario}/por-categoria`,{
+                headers: {'x-token': token}
+            });
+            console.log("DATOS DEL BACKEND PARA EL GRAFICO: ", respuestaCategorias.data);
+            //trasnformamos los datos del back al formato que necesita el grafico, añadiendo los colores
+            const datosFormateados = respuestaCategorias.data.map((item,index) => {
+                const nombreCategoria = item.categoria?.nombre_categoria || item.nombre_categoria || 'Desconocido';
+                return{
+                    id: index,
+                    name: nombreCategoria,
+                    value: Number(item.monto),
+                    color: colores_categorias[nombreCategoria] || colores_categorias['Otros']
+                };
+            }); 
+            
+            setGastosPorCategoria(datosFormateados);
+
         } catch (error) {
         console.error("Error al obtener los datos financieros:", error);
         }
@@ -92,6 +120,9 @@ export default function Dashboard({ onLogout }) {
                         subtitle="Total gastado" 
                         type="expense" 
                     />
+                </section>
+                <section className="dashboard-content-section">
+                    <ExpensesCard data={gastosPorCategoria}/>
                 </section>
                 <TransaccionesList transacciones={transacciones} />
         </main>
