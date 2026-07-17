@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../services/api'; 
 import '../styles/components/FormularioTransaccion.css';
 
@@ -6,7 +6,32 @@ export default function FormularioTransaccion({ isOpen, onClose, onTransactionAd
   const [monto, setMonto] = useState('');
   const [tipo, setTipo] = useState('gasto');
   const [idCategoria, setIdCategoria] = useState(1);
+  const [categorias, setCategorias] = useState([]);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      const cargarCategorias = async () => {
+        try {
+          const token = localStorage.getItem("token");
+          const respuesta = await api.get('/categorias', {
+            headers: { 'x-token': token }
+          });
+          
+          setCategorias(respuesta.data);
+          
+          if (respuesta.data.length > 0) {
+            setIdCategoria(respuesta.data[0].id_categoria);
+          }
+        } catch (error) {
+          console.error("Error al cargar las categorías:", error);
+          setError("No se pudieron cargar las categorías.");
+        }
+      };
+
+      cargarCategorias();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -35,7 +60,7 @@ export default function FormularioTransaccion({ isOpen, onClose, onTransactionAd
       };
 
       //Petición POST 
-      const respuesta = await api.post('/transaccion', nuevaTransaccion, {
+      const respuesta = await api.post('/transacciones', nuevaTransaccion, {
         headers: {
           'x-token': token
         }
@@ -48,7 +73,15 @@ export default function FormularioTransaccion({ isOpen, onClose, onTransactionAd
       }
     } catch (err) {
       console.error('Error al guardar la transacción:', err);
-      setError('Hubo un problema al guardar. Verificá los datos.');
+      
+      // Capturamos cualquier formato de error que venga del backend
+      const mensajeError = 
+        err.response?.data?.errores?.join(', ') || // Si frenó en el middleware
+        err.response?.data?.error ||               // Si frenó en el catch del controlador
+        err.response?.data?.msg ||                 // Si mandamos un mensaje con 'msg'
+        'Hubo un problema de conexión con el servidor.';
+        
+      setError(mensajeError);
     }
   };
 
@@ -81,13 +114,16 @@ export default function FormularioTransaccion({ isOpen, onClose, onTransactionAd
 
           <div className="form-group">
             <label>Categoría</label>
-            <select value={idCategoria} onChange={(e) => setIdCategoria(e.target.value)}>
-              <option value={1}>Alimentación</option>
-              <option value={2}>Transporte</option>
-              <option value={3}>Vivienda</option>
-              <option value={4}>Entretenimiento</option>
-              <option value={5}>Salud</option>
-              <option value={6}>Cryptomonedas</option>
+            <select value={idCategoria} onChange={(e) => setIdCategoria(e.target.value)} required>
+              {categorias.length === 0 ? (
+                <option value="">Cargando categorías...</option>
+              ) : (
+                categorias.map((cat) => (
+                  <option key={cat.id_categoria} value={cat.id_categoria}>
+                    {cat.nombre_categoria}
+                  </option>
+                ))
+              )}
             </select>
           </div>
 
