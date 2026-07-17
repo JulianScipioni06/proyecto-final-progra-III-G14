@@ -27,9 +27,19 @@
     justify-content: space-between;
     }
 
+    .dashboard-content-section {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        gap: 25px;
+        margin-top: 25px;
+        align-items: start;
+    }
 
     @media (max-width: 768px) {
     .dashboard-cards-section {
         flex-direction: column;
+    }
+    .dashboard-content-section{
+        grid-template-columns: 1fr;
     }
     }
