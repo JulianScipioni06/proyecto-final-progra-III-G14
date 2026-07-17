@@ -18,7 +18,7 @@ const colores_categorias = {
 }
 
 export default function Dashboard({ onLogout }) {
-  //Arrancamos los datos en cero, Hasta que la API nos devuelva los datos reales.
+    //Arrancamos los datos en cero, Hasta que la API nos devuelva los datos reales.
     const [datosFinancieros, setDatosFinancieros] = useState({
         balance: 0,
         ingresos: 0,
@@ -62,18 +62,32 @@ export default function Dashboard({ onLogout }) {
             const respuestaCategorias = await api.get(`/transacciones/${idUsuario}/por-categoria`,{
                 headers: {'x-token': token}
             });
-            console.log("DATOS DEL BACKEND PARA EL GRAFICO: ", respuestaCategorias.data);
-            //trasnformamos los datos del back al formato que necesita el grafico, añadiendo los colores
-            const datosFormateados = respuestaCategorias.data.map((item,index) => {
-                const nombreCategoria = item.categoria?.nombre_categoria || item.nombre_categoria || 'Desconocido';
-                return{
-                    id: index,
-                    name: nombreCategoria,
-                    value: Number(item.monto),
-                    color: colores_categorias[nombreCategoria] || colores_categorias['Otros']
-                };
-            }); 
+
+            const categoriasOficiales = ['Alimentación', 'Transporte', 'Vivienda', 'Entretenimiento', 'Salud', 'Ropa'];
             
+            //nos quedamos con las transacciones de gasto
+            const soloGastos = respuestaCategorias.data.filter(item => item.tipo === 'gasto');
+            
+            //sumamos montos para unificar duplicados
+            const acumulador = {};
+
+            soloGastos.forEach(item =>{
+                const nombreOriginal = item.categoria?.nombre_categoria || item.nombre_categoria || 'Otros';
+
+                const categoriaDestino = categoriasOficiales.includes(nombreOriginal) ? nombreOriginal : 'Otros';
+                if (!acumulador[categoriaDestino]){
+                    acumulador[categoriaDestino] = 0;
+                }
+                acumulador[categoriaDestino] += Number(item.monto);
+            });
+
+            //convertimos el acumulador en el array q necesita el grafico y le metemos los colores
+            const datosFormateados = Object.keys(acumulador).map((nombre, index) => ({
+                id: index,
+                name: nombre,
+                value: acumulador[nombre],
+                color: colores_categorias[nombre] || colores_categorias['Otros']
+            }));
             setGastosPorCategoria(datosFormateados);
 
         } catch (error) {
@@ -132,7 +146,7 @@ export default function Dashboard({ onLogout }) {
             onClose={() => setModalAbierto(false)}
             onTransactionAdded={() => window.location.reload()} 
         />
-  
+
         </div>
     );
 }
