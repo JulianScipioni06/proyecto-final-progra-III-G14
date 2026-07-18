@@ -1,45 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    .dashboard-main {
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.dashboard-main {
     padding: 30px 40px;
     max-width: 1200px;
     margin: 0 auto; 
-    }
+}
 
-    .dashboard-header-text {
+.dashboard-header-text {
     margin-bottom: 30px;
-    }
+}
 
-    .dashboard-title {
+.dashboard-title {
     font-size: 1.5rem;
     color: #1f2937;
     margin-bottom: 5px;
-    }
+}
 
-    .dashboard-date {
+.dashboard-date {
     color: #6b7280;
     font-size: 0.9rem;
-    }
+}
 
 
-    .dashboard-cards-section {
+.dashboard-cards-section {
     display: flex; 
     gap: 25px; 
     justify-content: space-between;
-    }
+}
 
-    .dashboard-content-section {
-        display: grid;
-        grid-template-columns: 380px 1fr;
-        gap: 25px;
-        margin-top: 25px;
-        align-items: start;
-    }
+.dashboard-content-section {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 25px;
+    margin-top: 25px;
+    align-items: start;
+}
 
-    @media (max-width: 768px) {
+@media (max-width: 768px) {
     .dashboard-cards-section {
         flex-direction: column;
     }
     .dashboard-content-section{
         grid-template-columns: 1fr;
     }
-    }
+}

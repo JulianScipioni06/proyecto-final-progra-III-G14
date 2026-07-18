@@ -6,10 +6,7 @@ function App() {
   const [estaLogueado, setEstaLogueado] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setEstaLogueado(true);
-    }
+    localStorage.removeItem('token');
   }, []);
 
   const cerrarSesion = () => {
