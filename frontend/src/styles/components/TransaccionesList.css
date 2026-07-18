@@ -119,3 +119,28 @@
 .transacciones-lista-btn:hover {
     background-color: #eff6ff;
 }
+
+.scroll-activado {
+    max-height: 380px; /* Podés jugar con este número para que quede a la misma altura que el gráfico de la dona */
+    overflow-y: auto;  /* Esto es lo que crea el scroll vertical automáticamente */
+    padding-right: 10px; /* Un margencito para que la barra de scroll no pise los números */
+}
+
+/* Opcional: Tunear la barra de scroll para que no se vea como la clásica de Windows de los 90s */
+.scroll-activado::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scroll-activado::-webkit-scrollbar-track {
+    background: #f1f5f9; 
+    border-radius: 10px;
+}
+
+.scroll-activado::-webkit-scrollbar-thumb {
+    background: #cbd5e1; 
+    border-radius: 10px;
+}
+
+.scroll-activado::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8; 
+}

@@ -14,7 +14,7 @@ const colores_categorias = {
     'Entretenimiento': '#ec4899',
     'Salud': '#8b5cf6',
     'Ropa': '#06b6d4',
-    'Otros': '#64748b' //por si viene alguna categoria q no mapeamos
+    'Otros': '#64748b' //por si viene alguna categoria q no registramos
 }
 
 export default function Dashboard({ onLogout }) {
@@ -27,6 +27,7 @@ export default function Dashboard({ onLogout }) {
     const [transacciones, setTransacciones] = useState([]);
     const [modalAbierto, setModalAbierto] = useState(false);
     const [gastosPorCategoria, setGastosPorCategoria] = useState([]);
+    const [actualizarDatos, setActualizarDatos] = useState(0);
 
     useEffect(() => {
     const obtenerDatos = async () => {
@@ -71,31 +72,56 @@ export default function Dashboard({ onLogout }) {
             //sumamos montos para unificar duplicados
             const acumulador = {};
 
-            soloGastos.forEach(item =>{
-                const nombreOriginal = item.categoria?.nombre_categoria || item.nombre_categoria || 'Otros';
-
-                const categoriaDestino = categoriasOficiales.includes(nombreOriginal) ? nombreOriginal : 'Otros';
-                if (!acumulador[categoriaDestino]){
-                    acumulador[categoriaDestino] = 0;
+            soloGastos.forEach(item => {
+                // Sacamos el nombre real de la base de datos
+                let nombreCategoria = item.categoria?.nombre_categoria || item.nombre_categoria;
+                
+                // Si viene vacío, lo salvamos
+                if (!nombreCategoria) {
+                    nombreCategoria = 'Otros';
                 }
-                acumulador[categoriaDestino] += Number(item.monto);
+
+                // Si la categoría no existe en nuestro objeto, la inicializamos en 0
+                if (!acumulador[nombreCategoria]){
+                    acumulador[nombreCategoria] = 0;
+                }
+                
+                // Le sumamos el monto
+                acumulador[nombreCategoria] += Number(item.monto);
             });
 
+            const paletaExtra = ['#84cc16', '#3b82f6', '#f43f5e', '#14b8a6', '#d946ef', '#f97316'];
+
             //convertimos el acumulador en el array q necesita el grafico y le metemos los colores
-            const datosFormateados = Object.keys(acumulador).map((nombre, index) => ({
-                id: index,
-                name: nombre,
-                value: acumulador[nombre],
-                color: colores_categorias[nombre] || colores_categorias['Otros']
-            }));
+            const datosFormateados = Object.keys(acumulador).map((nombre, index) => {
+                
+                let colorAsignado = colores_categorias[nombre];
+                
+                if (!colorAsignado) {
+                    colorAsignado = paletaExtra[index % paletaExtra.length];
+                }
+
+                return {
+                    id: index,
+                    name: nombre,
+                    value: acumulador[nombre],
+                    color: colorAsignado
+                };
+            });
             setGastosPorCategoria(datosFormateados);
+
+            const respuestaHistorial = await api.get(`/transacciones/${idUsuario}/historial`, {
+                headers: { 'x-token': token }
+            });
+
+            setTransacciones(respuestaHistorial.data);
 
         } catch (error) {
         console.error("Error al obtener los datos financieros:", error);
         }
     };
     obtenerDatos();
-    }, []);
+    }, [actualizarDatos]);
 
     const fechaActual = new Date().toLocaleDateString("es-AR", {
         weekday: "long",
@@ -106,12 +132,14 @@ export default function Dashboard({ onLogout }) {
 
     return (
     <div className="dashboard-container">
-        <Navbar onLogout={onLogout} />
+        <Navbar 
+            onLogout={onLogout} 
+            onAbrirModal={() => setModalAbierto(true)} 
+        />
         <main className="dashboard-main">
             <div className="dashboard-header-text">
             <h1 className="dashboard-title">Resumen general</h1>
             <p className="dashboard-date">{fechaActual}</p>
-            <button className="btn-nueva-transaccion" onClick={() => setModalAbierto(true)}>Nueva transacción</button>
             </div>
 
             <section className="dashboard-cards-section">
@@ -137,14 +165,17 @@ export default function Dashboard({ onLogout }) {
                 </section>
                 <section className="dashboard-content-section">
                     <ExpensesCard data={gastosPorCategoria}/>
+                    <TransaccionesList transacciones={transacciones} />
                 </section>
-                <TransaccionesList transacciones={transacciones} />
         </main>
 
         <FormularioTransaccion 
             isOpen={modalAbierto}
             onClose={() => setModalAbierto(false)}
-            onTransactionAdded={() => window.location.reload()} 
+            onTransactionAdded={() => {
+                setModalAbierto(false);
+                setActualizarDatos(actualizarDatos + 1);
+            }} 
         />
 
         </div>
