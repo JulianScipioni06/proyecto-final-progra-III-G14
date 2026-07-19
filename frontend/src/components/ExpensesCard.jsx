@@ -1,5 +1,17 @@
-import React, {useState} from 'react';
+import React, {useState, useMemo} from 'react';
 import '../styles/components/ExpensesCard.css';
+
+const colores_categorias = {
+    'Alimentacion': '#2563eb',
+    'Transporte': '#10b981',
+    'Vivienda': '#f59e0b',
+    'Entretenimiento': '#ec4899',
+    'Salud': '#8b5cf6',
+    'Ropa': '#06b6d4',
+    'Otros': '#64748b' //por si viene alguna categoria q no registramos
+}
+
+const paletaExtra = ['#84cc16', '#3b82f6', '#f43f5e', '#14b8a6', '#d946ef', '#f97316'];
 
 // grafico
 const DonutChart = ({data, total, hoveredItem, setHoveredItem}) => {
@@ -103,17 +115,43 @@ const LegendItem = ({item, hoveredItem, setHoveredItem}) => {
 
 // componente principal exportado
 const ExpensesCard = ({data}) => {
-    // suma total automatizada de todos los montos
-    const totalExpenses = data.reduce((sum, item) => sum + item.value, 0);
     // estado para controlar donde esta el mouse
     const [hoveredItem, setHoveredItem] = useState(null);
+    //procesamos la data usando useMemo
+    const dataProcesada = useMemo(() => {
+        if (!data || data.lenght === 0) return [];
+        // filtramos que sea solo gastos
+        const soloGastos = data.filter(item => item.tipo === 'gasto');
+        const acumulador = {};
+        soloGastos.forEach(item => {
+            let nombreCategoria = item.categoria?.nombre_categoria || item.nombre_categoria;
+            if (!nombreCategoria) nombreCategoria = 'Otros';
+            if (!acumulador[nombreCategoria]){
+                acumulador[nombreCategoria] = 0;
+            }
+            acumulador[nombreCategoria] += Number(item.monto || 0);
+        });
+        return Object.keys(acumulador).map((nombre, index)=> {
+            let colorAsignado = colores_categorias[nombre];
+            if (!colorAsignado){
+                colorAsignado = paletaExtra[index % paletaExtra.length];
+            }
+            return{
+                id: index,
+                name: nombre,
+                value: acumulador[nombre],
+                color: colorAsignado
+            };
+        });
+    }, [data]); // solo se calcula denuevo si la data cambia
 
+    const totalExpenses = dataProcesada.reduce((sum, item) => sum + item.value, 0);
     return (
         <div className='expenses-card'>
             <h2 className='card-title'>Gastos por categoria</h2>
-            <DonutChart data={data} total={totalExpenses} hoveredItem={hoveredItem} setHoveredItem={setHoveredItem}/>
+            <DonutChart data={dataProcesada} total={totalExpenses} hoveredItem={hoveredItem} setHoveredItem={setHoveredItem}/>
             <div className='legend-list'>
-                {data.map((item) => (
+                {dataProcesada.map((item) => (
                     <LegendItem key={item.id} item={item} hoveredItem={hoveredItem} setHoveredItem={setHoveredItem}/>
                 ))}
             </div>
