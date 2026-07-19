@@ -7,15 +7,6 @@ import TransaccionesList from "../components/TransaccionesList";
 import FormularioTransaccion from "../components/FormularioTransaccion";
 import ExpensesCard from "../components/ExpensesCard";
 
-const colores_categorias = {
-    'Alimentacion': '#2563eb',
-    'Transporte': '#10b981',
-    'Vivienda': '#f59e0b',
-    'Entretenimiento': '#ec4899',
-    'Salud': '#8b5cf6',
-    'Ropa': '#06b6d4',
-    'Otros': '#64748b' //por si viene alguna categoria q no registramos
-}
 
 export default function Dashboard({ onLogout }) {
     //Arrancamos los datos en cero, Hasta que la API nos devuelva los datos reales.
@@ -64,51 +55,7 @@ export default function Dashboard({ onLogout }) {
                 headers: {'x-token': token}
             });
 
-            const categoriasOficiales = ['Alimentación', 'Transporte', 'Vivienda', 'Entretenimiento', 'Salud', 'Ropa'];
-            
-            //nos quedamos con las transacciones de gasto
-            const soloGastos = respuestaCategorias.data.filter(item => item.tipo === 'gasto');
-            
-            //sumamos montos para unificar duplicados
-            const acumulador = {};
-
-            soloGastos.forEach(item => {
-                // Sacamos el nombre real de la base de datos
-                let nombreCategoria = item.categoria?.nombre_categoria || item.nombre_categoria;
-                
-                // Si viene vacío, lo salvamos
-                if (!nombreCategoria) {
-                    nombreCategoria = 'Otros';
-                }
-
-                // Si la categoría no existe en nuestro objeto, la inicializamos en 0
-                if (!acumulador[nombreCategoria]){
-                    acumulador[nombreCategoria] = 0;
-                }
-                
-                // Le sumamos el monto
-                acumulador[nombreCategoria] += Number(item.monto);
-            });
-
-            const paletaExtra = ['#84cc16', '#3b82f6', '#f43f5e', '#14b8a6', '#d946ef', '#f97316'];
-
-            //convertimos el acumulador en el array q necesita el grafico y le metemos los colores
-            const datosFormateados = Object.keys(acumulador).map((nombre, index) => {
-                
-                let colorAsignado = colores_categorias[nombre];
-                
-                if (!colorAsignado) {
-                    colorAsignado = paletaExtra[index % paletaExtra.length];
-                }
-
-                return {
-                    id: index,
-                    name: nombre,
-                    value: acumulador[nombre],
-                    color: colorAsignado
-                };
-            });
-            setGastosPorCategoria(datosFormateados);
+            setGastosPorCategoria(respuestaCategorias.data);
 
             const respuestaHistorial = await api.get(`/transacciones/${idUsuario}/historial`, {
                 headers: { 'x-token': token }
