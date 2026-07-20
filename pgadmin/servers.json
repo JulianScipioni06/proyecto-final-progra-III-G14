@@ -1,0 +1,14 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "Base de Datos - Gastos",
+            "Group": "Servidores Locales",
+            "Host": "database",
+            "Port": 5432,
+            "MaintenanceDB": "postgres",
+            "Username": "usuario",
+            "SSLMode": "prefer",
+            "Comment": "Conexión automática generada por Docker"
+        }
+    }
+}
