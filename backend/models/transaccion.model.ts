@@ -21,13 +21,18 @@ Transaccion.init(
         },
         tipo: {
             type: DataTypes.STRING,
-            allowNull: false, // Aquí guardarán 'ingreso' o 'gasto'
+            allowNull: false, 
         },
         fecha: {
             type: DataTypes.DATE,
             allowNull: false,
             defaultValue: DataTypes.NOW,
         },
+        descripcion: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: 'Movimiento sin Descripcion',
+        }
     },
     {
         sequelize,

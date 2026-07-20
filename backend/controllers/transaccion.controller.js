@@ -4,12 +4,13 @@ const { Op, Sequelize } = require('sequelize');
 
 const crearTransaccion = async (req, res) => {
     try {
-        const { monto, tipo, id_usuario, id_categoria } = req.body;
+        const { monto, tipo, descripcion, id_usuario, id_categoria } = req.body;
 
         // Crear registro en la base de datos
         const nuevaTransaccion = await Transaccion.create({
             monto: parseFloat(monto),
             tipo,
+            descripcion,
             id_usuario, 
             id_categoria  
         });
@@ -36,7 +37,7 @@ const crearTransaccion = async (req, res) => {
 const obtenerHistorial = async (req, res) => {
     try {
         const { id_usuario } = req.params;
-        const { tipo, id_categoria, fechaInicio, fechaFin } = req.query;
+        const { tipo, id_categoria, descripcion, fechaInicio, fechaFin } = req.query;
     
         let filtros = { id_usuario };
     
@@ -185,10 +186,8 @@ const obtenerBalance = async (req, res) => {
     const { id_usuario } = req.params;
 
     try {
-        // Forzamos que el ID sea un número para que PostgreSQL lo entienda perfecto
         const idNum = parseInt(id_usuario, 10);
 
-        // Asegurate de que 'ingreso' y 'gasto' estén 100% en minúsculas
         const totalIngresos = await Transaccion.sum('monto', { 
             where: { id_usuario: idNum, tipo: 'ingreso' } 
         }) || 0;
