@@ -8,6 +8,7 @@ export default function FormularioTransaccion({ isOpen, onClose, onTransactionAd
   const [idCategoria, setIdCategoria] = useState(1);
   const [categorias, setCategorias] = useState([]);
   const [error, setError] = useState(null);
+  const [descripcion, setDescripcion] = useState("")
 
   useEffect(() => {
     if (isOpen) {
@@ -55,6 +56,7 @@ export default function FormularioTransaccion({ isOpen, onClose, onTransactionAd
       const nuevaTransaccion = {
         monto: parseFloat(monto),
         tipo: tipo,
+        descripcion: descripcion,
         id_usuario: Number(idUsuario),
         id_categoria: parseInt(idCategoria)
       };
@@ -69,6 +71,7 @@ export default function FormularioTransaccion({ isOpen, onClose, onTransactionAd
       if (respuesta.status === 201 || respuesta.status === 200) {
         onTransactionAdded(); 
         setMonto('');
+        setDescripcion('')
         onClose();
       }
     } catch (err) {
@@ -109,6 +112,16 @@ export default function FormularioTransaccion({ isOpen, onClose, onTransactionAd
               value={monto} 
               onChange={(e) => setMonto(e.target.value)} 
               required 
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Descripción</label>
+            <input
+              type="text"
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+              placeholder="Ej: Compra de supermercado"
             />
           </div>
 
