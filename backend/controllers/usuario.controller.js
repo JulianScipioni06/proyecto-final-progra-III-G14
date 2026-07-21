@@ -153,9 +153,28 @@ const obtenerTodosLosUsuarios = async (req, res) => {
     }
 };
 
+const obtenerUsuarioPorId = async (req, res) => {
+    try {
+        const { id_usuario } = req.params;
+        const usuario = await Usuario.findByPk(id_usuario, {
+            attributes: { exclude: ['contrasena'] }
+        });
+
+        if (!usuario) {
+            return res.status(404).json({ msg: 'Usuario no encontrado.' });
+        }
+
+        return res.status(200).json(usuario);
+    } catch (error) {
+        console.error('Error al obtener usuario:', error);
+        return res.status(500).json({ error: 'Error interno al obtener el usuario.' });
+    }
+};
+
 module.exports = {
     registrarUsuario,
     loginUsuario,
     obtenerTodosLosUsuarios,
-    actualizarUsuario
+    actualizarUsuario,
+    obtenerUsuarioPorId
 };

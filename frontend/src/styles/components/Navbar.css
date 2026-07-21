@@ -95,3 +95,21 @@
 .btn-logout:active {
     transform: scale(0.97);
 }
+
+.btn-configuracion {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background-color: #f3f4f6;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+}
+
+.btn-configuracion:hover {
+    background-color: #e5e7eb;
+}
