@@ -6,6 +6,7 @@ import SummaryCard from "../components/SummaryCard";
 import TransaccionesList from "../components/TransaccionesList";
 import FormularioTransaccion from "../components/FormularioTransaccion";
 import ExpensesCard from "../components/ExpensesCard";
+import ModalConfirmacion from "../components/ModalConfirmacion";
 
 
 export default function Dashboard({ onLogout }) {
@@ -19,6 +20,8 @@ export default function Dashboard({ onLogout }) {
     const [modalAbierto, setModalAbierto] = useState(false);
     const [gastosPorCategoria, setGastosPorCategoria] = useState([]);
     const [actualizarDatos, setActualizarDatos] = useState(0);
+    const [transaccionAEditar, setTransaccionAEditar] = useState(null);
+    const [idAEliminar, setIdAEliminar] = useState(null);
 
     useEffect(() => {
     const obtenerDatos = async () => {
@@ -70,6 +73,31 @@ export default function Dashboard({ onLogout }) {
     obtenerDatos();
     }, [actualizarDatos]);
 
+    const handleEliminarTransaccion = (idTransaccion) =>{
+        setIdAEliminar (idTransaccion);
+    }
+
+    const confirmarBorrado =  async() => {
+
+        try{
+            const token = localStorage.getItem("token");
+            await api.delete(`/transacciones/${idAEliminar}`, {
+                headers: {'x-token': token}
+            });
+            setActualizarDatos(actualizarDatos + 1);
+            setIdAEliminar(null);
+    } catch (error){
+        console.error("Error al eliminar la transaccion", error);
+        alert("Error al intentar borrar el registro");
+        }
+    }
+
+    const handleEditarTransaccion = (transaccion) =>{
+        setTransaccionAEditar(transaccion);
+        setModalAbierto(true);
+    };
+
+
     const fechaActual = new Date().toLocaleDateString("es-AR", {
         weekday: "long",
         day: "numeric",
@@ -81,7 +109,10 @@ export default function Dashboard({ onLogout }) {
     <div className="dashboard-container">
         <Navbar 
             onLogout={onLogout} 
-            onAbrirModal={() => setModalAbierto(true)} 
+            onAbrirModal={() => {
+                setModalAbierto(true)
+                setTransaccionAEditar(null);
+            }} 
         />
         <main className="dashboard-main">
             <div className="dashboard-header-text">
@@ -112,19 +143,30 @@ export default function Dashboard({ onLogout }) {
                 </section>
                 <section className="dashboard-content-section">
                     <ExpensesCard data={gastosPorCategoria}/>
-                    <TransaccionesList transacciones={transacciones} />
+                    <TransaccionesList transacciones={transacciones}
+                    onEliminar={handleEliminarTransaccion}
+                    onEditar={handleEditarTransaccion}/>
                 </section>
         </main>
 
         <FormularioTransaccion 
             isOpen={modalAbierto}
-            onClose={() => setModalAbierto(false)}
+            onClose={() => {
+                setModalAbierto(false);
+                setTransaccionAEditar(null);
+            }}
             onTransactionAdded={() => {
                 setModalAbierto(false);
+                setTransaccionAEditar(null);
                 setActualizarDatos(actualizarDatos + 1);
-            }} 
+            }}
+            transaccionAEditar={transaccionAEditar} 
         />
-
-        </div>
-    );
+        <ModalConfirmacion
+            isOpen={idAEliminar !== null}
+            onClose={() => setIdAEliminar(null)}
+            onConfirm={confirmarBorrado}
+        />
+    </div>
+    )
 }
