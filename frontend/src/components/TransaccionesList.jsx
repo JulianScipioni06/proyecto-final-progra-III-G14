@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { FiArrowUpRight, FiArrowDownRight } from 'react-icons/fi';
+import { FiArrowUpRight, FiArrowDownRight, FiEdit2, FiTrash2} from 'react-icons/fi';
 import '../styles/components/TransaccionesList.css';
 
-export default function TransaccionesList({ transacciones = [] }) {
+export default function TransaccionesList({ transacciones = [], onEditar, onEliminar}) {
     const [verTodas, setVerTodas] = useState(false);
 
     const ultimasTransacciones = 5;
@@ -70,6 +70,14 @@ export default function TransaccionesList({ transacciones = [] }) {
                                     <span className="transacciones-date">
                                         {new Date(t.fecha).toLocaleDateString('es-AR')}
                                     </span>
+                                    <div className="transacciones-acciones">
+                                        <button onClick={() => onEditar(t)}className="btn-editar" title="Editar">
+                                            <FiEdit2 size={16}/>
+                                        </button>
+                                        <button onClick={() => onEliminar(t.id_transaccion)} className="btn-eliminar" title="Eliminar">
+                                            <FiTrash2 size={16}/>
+                                        </button>
+                                    </div>
                                 </div>
                             </li>
                         );
