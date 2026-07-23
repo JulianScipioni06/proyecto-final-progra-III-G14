@@ -16,9 +16,110 @@ transaccion.findByPk = jest.fn();
 transaccion.findAll = jest.fn();
 
 //crear transaccion
+describe('POST /transacciones', () => {
+    it('Debe crear una transaccion correctamente y devolver 201', async () => {
+        const nuevaTransaccion = {
+            id: '124',
+            monto: 2500,
+            categoria: 'Comida',
+            tipo: 'Gasto'
+        };
+
+        transaccion.create.mockResolvedValue(nuevaTransaccion);
+
+        const res = await request(app)
+            .post('/transacciones')
+            .send({
+                monto: 2500,
+                categoria: 'Comida',
+                tipo: 'Gasto'
+            });
+
+        expect(res.status).toBe(201);
+    });
+
+    it('Debe devolver 500 si ocurre un error al crear en la BD', async () => {
+        transaccion.create.mockRejectedValue(new Error('Error en BD'));
+
+        const res = await request(app)
+            .post('/transacciones')
+            .send({ monto: 2500 });
+
+        expect(res.status).toBe(500);
+    });
+});
+
 //obtener historial
+describe('GET /transacciones/:id_usuario/historial', () => {
+    it('Debe devolver la lista completa de transacciones y status 200', async () => {
+        const listaMock = [
+            { id: '1', monto: 1000, tipo: 'Ingreso' },
+            { id: '2', monto: 500, tipo: 'Gasto' }
+        ];
+
+        transaccion.findAll.mockResolvedValue(listaMock);
+
+        // Pasamos un id_usuario de prueba 
+        const res = await request(app).get('/transacciones/1/historial');
+
+        expect(res.status).toBe(200);
+    });
+
+    it('Debe devolver 500 si falla la consulta del historial', async () => {
+        transaccion.findAll.mockRejectedValue(new Error('Error en la consulta'));
+
+        const res = await request(app).get('/transacciones/1/historial');
+
+        expect(res.status).toBe(500);
+    });
+});
+
 //obtener por categoria
+describe('GET /transacciones/:id_usuario/por-categoria', () => {
+    it('Debe devolver las transacciones que coincidan con la categoria', async () => {
+        const listaComidaMock = [
+            { id: '1', monto: 1200, categoria: 'Comida' }
+        ];
+
+        transaccion.findAll.mockResolvedValue(listaComidaMock);
+
+        // Pasamos id_usuario=1 y query param ?categoria=Comida si tu controlador lo requiere asi
+        const res = await request(app).get('/transacciones/1/por-categoria?categoria=Comida');
+
+        expect(res.status).toBe(200);
+    });
+
+    it('Debe devolver 500 si falla la búsqueda por categoría', async () => {
+        transaccion.findAll.mockRejectedValue(new Error('Error de conexión'));
+
+        const res = await request(app).get('/transacciones/1/por-categoria?categoria=Comida');
+
+        expect(res.status).toBe(500);
+    });
+});
+
 //obtener por tipo
+describe('GET /transacciones/:id_usuario/por-tipo', () => {
+    it('Debe devolver las transacciones según el tipo especificado', async () => {
+        const listaIngresosMock = [
+            { id: '1', monto: 5000, tipo: 'Ingreso' }
+        ];
+
+        transaccion.findAll.mockResolvedValue(listaIngresosMock);
+
+        const res = await request(app).get('/transacciones/1/por-tipo?tipo=Ingreso');
+
+        expect(res.status).toBe(200);
+    });
+
+    it('Debe devolver 500 si ocurre un error al filtrar por tipo', async () => {
+        transaccion.findAll.mockRejectedValue(new Error('Error interno'));
+
+        const res = await request(app).get('/transacciones/1/por-tipo?tipo=Ingreso');
+
+        expect(res.status).toBe(500);
+    });
+});
 
 //editar transaccion
 describe('PUT /transacciones/:id', () => {
