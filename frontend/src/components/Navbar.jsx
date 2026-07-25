@@ -4,7 +4,7 @@ import { BiWalletAlt } from 'react-icons/bi';
 import ModalConfiguracion from './ModalConfiguracion';
 import '../styles/components/Navbar.css';
 
-export default function Navbar({ onLogout }) {
+export default function Navbar({ onLogout, onAbrirModal }) {
     const [modalAbierto, setModalAbierto] = useState(false);
 
     return (
@@ -27,7 +27,7 @@ export default function Navbar({ onLogout }) {
                 </ul>
 
                 <div className="navbar-actions">
-                    <button className="btn-nueva-transaccion"><FiPlus size={18}/>Nueva transacción</button>
+                    <button className="btn-nueva-transaccion" onClick={onAbrirModal}><FiPlus size={18}/>Nueva transacción</button>
                     <button className="btn-configuracion" onClick={() => setModalAbierto(true)}>
                         <FiSettings size={18}/> Configuración
                     </button>
