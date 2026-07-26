@@ -4,32 +4,30 @@ const { Op, Sequelize } = require('sequelize');
 
 const crearTransaccion = async (req, res) => {
     try {
-        const { monto, tipo, id_usuario, id_categoria } = req.body;
+        const { monto, tipo, descripcion, id_usuario, id_categoria } = req.body;
+        const montoParseado = parseFloat(monto);
 
-        if (!monto || !tipo || !id_usuario || !id_categoria) {
-            return res.status(400).json({ 
-                error: "Faltan campos obligatorios (monto, tipo, id_usuario, id_categoria)." 
-            });
-        }
+        if(tipo === 'gasto'){
+            const totalIngresos = await Transaccion.sum('monto', {
+                where: {id_usuario, tipo: 'ingreso'}
+            }) || 0;
+            const totalGastos = await Transaccion.sum('monto', {
+                where: {id_usuario, tipo: 'gasto'}
+            }) || 0;
+            const balanceActual = totalIngresos - totalGastos;
 
-        // Validar que el tipo sea correcto
-        if (tipo !== 'ingreso' && tipo !== 'gasto') {
-            return res.status(400).json({ 
-                error: "El tipo de transacción debe ser 'ingreso' o 'gasto'." 
-            });
-        }
-
-        // Validar que el monto sea un número positivo válido
-        if (isNaN(monto) || parseFloat(monto) <= 0) {
-            return res.status(400).json({ 
-                error: "El monto debe ser un número mayor a cero." 
-            });
+            if(balanceActual - montoParseado < 0){
+                return res.status(400).json({
+                    error: `Fondos insuficientes. Tu balance actual es de $${balanceActual}.`
+                });
+            }
         }
 
         // Crear registro en la base de datos
         const nuevaTransaccion = await Transaccion.create({
-            monto: parseFloat(monto),
+            monto: montoParseado,
             tipo,
+            descripcion,
             id_usuario, 
             id_categoria  
         });
@@ -40,6 +38,12 @@ const crearTransaccion = async (req, res) => {
         });
 
     } catch (error) {
+        if (error.name === 'SequelizeForeignKeyConstraintError') {
+            return res.status(400).json({ 
+                error: "El usuario o la categoría indicada no existen en la base de datos." 
+            });
+        }
+
         console.error("Error en crearTransaccion:", error);
         return res.status(500).json({ 
             error: "Hubo un problema interno al registrar la transacción." 
@@ -50,7 +54,7 @@ const crearTransaccion = async (req, res) => {
 const obtenerHistorial = async (req, res) => {
     try {
         const { id_usuario } = req.params;
-        const { tipo, id_categoria, fechaInicio, fechaFin } = req.query;
+        const { tipo, id_categoria, descripcion, fechaInicio, fechaFin } = req.query;
     
         let filtros = { id_usuario };
     
@@ -199,10 +203,8 @@ const obtenerBalance = async (req, res) => {
     const { id_usuario } = req.params;
 
     try {
-        // Forzamos que el ID sea un número para que PostgreSQL lo entienda perfecto
         const idNum = parseInt(id_usuario, 10);
 
-        // Asegurate de que 'ingreso' y 'gasto' estén 100% en minúsculas
         const totalIngresos = await Transaccion.sum('monto', { 
             where: { id_usuario: idNum, tipo: 'ingreso' } 
         }) || 0;

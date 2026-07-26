@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.dashboard-main {
+    padding: 30px 40px;
+    max-width: 1200px;
+    margin: 0 auto; 
+}
+
+.dashboard-header-text {
+    margin-bottom: 30px;
+}
+
+.dashboard-title {
+    font-size: 1.5rem;
+    color: #1f2937;
+    margin-bottom: 5px;
+}
+
+.dashboard-date {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+
+.dashboard-cards-section {
+    display: flex; 
+    gap: 25px; 
+    justify-content: space-between;
+}
+
+.dashboard-content-section {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 25px;
+    margin-top: 25px;
+    align-items: start;
+}
+
+.modal-historial {
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-historial-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .dashboard-cards-section {
+        flex-direction: column;
+    }
+    .dashboard-content-section{
+        grid-template-columns: 1fr;
+    }
+}

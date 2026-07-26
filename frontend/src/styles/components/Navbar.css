@@ -1,0 +1,115 @@
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+
+.navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1; 
+}
+
+.navbar-logo span {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #1f2937;
+}
+
+.navbar-menu {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-menu li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    color: #6b7280;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.navbar-menu li.active {
+    background-color: #eff6ff; 
+    color: #2563eb;
+    font-weight: bold;
+}
+
+
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; 
+    gap: 15px; 
+    flex: 1; 
+}
+
+.btn-nueva-transaccion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-nueva-transaccion:hover {
+    background-color: #1d4ed8;
+}
+
+
+.btn-logout {
+    background-color: transparent;
+    color: #5c636a;
+    border: 1px solid #ced4da;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-logout:hover {
+    background-color: #fff5f5;
+    color: #dc3545;
+    border-color: #dc3545;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.1);
+}
+
+.btn-logout:active {
+    transform: scale(0.97);
+}
+
+.btn-configuracion {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background-color: #f3f4f6;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+}
+
+.btn-configuracion:hover {
+    background-color: #e5e7eb;
+}

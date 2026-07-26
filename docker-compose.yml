@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # 1. Base de Datos
+  database:
+    image: postgres:15-alpine
+    container_name: gastos_db
+    restart: always
+    environment:
+      POSTGRES_USER: usuario
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db_gastos
+    ports:
+      - "5432:5432"
+    volumes:
+      # Persistencia de datos (para no perderlos si se apaga el contenedor)
+      - postgres_data:/var/lib/postgresql/data
+      # Script inicial para crear tablas/esquemas si la BD está vacía
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # 2. Gestor Visual de BD (pgAdmin)
+  pgadmin:
+    build: 
+      context: ./pgadmin
+      # Si el Dockerfile de pgAdmin es estándar, lo construye desde ahí
+    container_name: gastos_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - database
+
+  # 3. Backend (API Node.js)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gastos_backend
+    restart: always
+    environment:
+      # OJO: Acá el host de la DB es "database" (el nombre del servicio de arriba), no "localhost"
+      - DATABASE_URL=postgres://usuario:password@database:5432/db_gastos
+      - PORT=3001
+      - SECRET_KEY=TuClaveSegura
+    ports:
+      - "3001:3001"
+    depends_on:
+      - database
+
+  # 4. Frontend (React + Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: gastos_frontend
+    environment:
+      # Variable para que Vite sepa dónde pegarle al backend (ajustar según tu código)
+      - VITE_API_URL=http://localhost:3001
+    ports:
+      - "5173:5173" # Puerto por defecto de Vite
+    volumes:
+      # Sincroniza el código en vivo para desarrollo (Hot Reloading)
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend
+
+  # 5. Reverse Proxy (Caddy)
+  caddy:
+    # Asumiendo que adentro de /caddy tenés un archivo Caddyfile o un Dockerfile
+    image: caddy:alpine
+    container_name: gastos_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Monta tu configuración de Caddy
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+
+# Declaración de los volúmenes nombrados para persistencia
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:

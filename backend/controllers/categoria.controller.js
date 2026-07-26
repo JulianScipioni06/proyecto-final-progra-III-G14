@@ -1,14 +1,9 @@
-const {Op} = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 const categoria = require('../models/categoria.model');
 
 const crearCategoria = async (req , res) => {
     try{
         const {nombre_categoria} = req.body;
-
-        if (!nombre_categoria){
-            return res.status(400).json ({
-                mensaje: `debe poner un nombre de categoria`});
-        }
 
         // validamos que no se dupliquen las categorias
         const categoriaExiste = await categoria.findOne({
@@ -49,19 +44,25 @@ const actualizarCategoria = async (req, res) => {
         const { id } = req.params;
         const { nombre_categoria } = req.body; 
 
-        if (!nombre_categoria) {
-            return res.status(400).json({ msg: 'El nombre de la categoría es obligatorio' });
-        }
-
         const categoriaEncontrada = await categoria.findByPk(id);
         if (!categoriaEncontrada) {
             return res.status(404).json({ msg: 'Categoría no encontrada' });
         }
 
+        if (!categoriaEncontrada.nombre_categoria) {
+            return res.status(500).json({ 
+                msg: `Inconsistencia en la BDD: La categoría con ID ${id} tiene un nombre nulo o indefinido. Por favor, borrá este registro manualmente de la base de datos.` 
+            });
+        }
+
+        if (categoriaEncontrada.nombre_categoria.toLowerCase() === nombre_categoria.trim().toLowerCase()) {
+            return res.status(400).json({ msg: 'La categoría ya tiene ese nombre. No ingresaste cambios.' });
+        }
+
         const categoriaDuplicada = await categoria.findOne({
             where: {
-                nombre_categoria: { [Op.iLike]: nombre_categoria },
-                id_categoria: { [Op.not]: id } 
+                nombre_categoria: { [Op.iLike]: nombre_categoria.trim() },
+                id_categoria: { [Op.ne]: id } 
             }
         });
 
@@ -69,7 +70,7 @@ const actualizarCategoria = async (req, res) => {
             return res.status(400).json({ msg: 'Ya existe otra categoría con ese nombre' });
         }
 
-        categoriaEncontrada.nombre_categoria = nombre_categoria;
+        categoriaEncontrada.nombre_categoria = nombre_categoria.trim();
         await categoriaEncontrada.save();
 
         return res.status(200).json({
@@ -78,8 +79,11 @@ const actualizarCategoria = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ msg: 'Error interno del servidor al actualizar' });
+        console.error('Error al actualizar categoría:', error);
+        return res.status(500).json({ 
+            msg: 'Error interno del servidor al actualizar',
+            detalle_del_error: error.message 
+        });
     }
 };
 

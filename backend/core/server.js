@@ -49,9 +49,11 @@ class Server {
     }
 
     listen() {
-        this.app.listen(this.port, () => {
-            console.log(`La API esta escuchando el el puerto: ${this.port}`);
-        });
+        if (process.env.NODE_ENV !== 'test'){
+            this.app.listen(this.port, () => {
+                console.log(`La API esta escuchando el el puerto: ${this.port}`);
+            });
+        }
     }
 }
 
