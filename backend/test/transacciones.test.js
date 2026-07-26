@@ -14,6 +14,8 @@ jest.mock('../models/transaccion.model');
 const { validarJWT } = require('../middleware/validar-jwt.middleware');
 transaccion.findByPk = jest.fn();
 transaccion.findAll = jest.fn();
+transaccion.create = jest.fn();
+transaccion.sum = jest.fn();
 
 //crear transaccion
 describe('POST /transacciones', () => {
