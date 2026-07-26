@@ -54,6 +54,7 @@ El proyecto está dividido en dos grandes bloques (Backend y Frontend), integran
 │   ├── /config              # Configuración de BD
 │   ├── /controllers         # Lógica de negocio
 │   ├── /core                # Configuración del servidor
+|   ├── /coverage            # Reportes y Métricas de cobertura de código
 │   ├── /interfaces          # Tipado estricto (TypeScript)
 │   ├── /middleware          # Validadores y JWT
 │   ├── /migrations          # Scripts de creación de tablas
@@ -61,6 +62,7 @@ El proyecto está dividido en dos grandes bloques (Backend y Frontend), integran
 │   ├── /node_modules        # Dependencias de Node instaladas
 │   ├── /routes              # Endpoints
 │   ├── /seeders             # Datos iniciales (Categorías)
+|   ├── /test                # Pruebas unitarias y de integración
 │   ├── .dockerignore        # Archivos excluidos del contenedor Docker
 │   ├── .env                 # Variables de entorno locales
 │   ├── .npmrc               # Configuración de gestión de paquetes
