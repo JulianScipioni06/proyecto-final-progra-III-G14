@@ -11,6 +11,10 @@
   z-index: 2000;
 }
 
+.modal-overlay.modal-prioritario {
+  z-index: 2050;
+}
+
 .modal-container {
   background-color: #ffffff;
   padding: 24px;

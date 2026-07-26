@@ -110,7 +110,7 @@ export default function FormularioTransaccion({ isOpen, onClose, onTransactionAd
   };
 
   return (
-    <div className="modal-overlay">
+    <div className="modal-overlay modal-prioritario">
       <div className="modal-container">
         <h3>Nueva Transacción</h3>
         {error && <div className="error-message">{error}</div>}
