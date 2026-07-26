@@ -9,6 +9,7 @@ jest.mock('../middleware/usuario-validator.middleware', () => ({
 const request = require('supertest');
 const app = require('../app');
 const usuario = require('../models/usuario.model');
+jest.mock('../models/usuario.model');
 usuario.findByPk = jest.fn();
 
 usuario.findOne = jest.fn();
