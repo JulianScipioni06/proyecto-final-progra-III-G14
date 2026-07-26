@@ -5,10 +5,27 @@ const { Op, Sequelize } = require('sequelize');
 const crearTransaccion = async (req, res) => {
     try {
         const { monto, tipo, descripcion, id_usuario, id_categoria } = req.body;
+        const montoParseado = parseFloat(monto);
+
+        if(tipo === 'gasto'){
+            const totalIngresos = await Transaccion.sum('monto', {
+                where: {id_usuario, tipo: 'ingreso'}
+            }) || 0;
+            const totalGastos = await Transaccion.sum('monto', {
+                where: {id_usuario, tipo: 'gasto'}
+            }) || 0;
+            const balanceActual = totalIngresos - totalGastos;
+
+            if(balanceActual - montoParseado < 0){
+                return res.status(400).json({
+                    error: `Fondos insuficientes. Tu balance actual es de $${balanceActual}.`
+                });
+            }
+        }
 
         // Crear registro en la base de datos
         const nuevaTransaccion = await Transaccion.create({
-            monto: parseFloat(monto),
+            monto: montoParseado,
             tipo,
             descripcion,
             id_usuario, 
