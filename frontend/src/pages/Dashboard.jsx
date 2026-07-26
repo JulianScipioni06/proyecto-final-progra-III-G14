@@ -22,6 +22,7 @@ export default function Dashboard({ onLogout }) {
     const [actualizarDatos, setActualizarDatos] = useState(0);
     const [transaccionAEditar, setTransaccionAEditar] = useState(null);
     const [idAEliminar, setIdAEliminar] = useState(null);
+    const [modalHistorialAbierto, setModalHistorialAbierto] = useState(false);
 
     useEffect(() => {
     const obtenerDatos = async () => {
@@ -113,6 +114,7 @@ export default function Dashboard({ onLogout }) {
                 setModalAbierto(true)
                 setTransaccionAEditar(null);
             }} 
+            onAbrirHistorial={() => setModalHistorialAbierto(true)}
         />
         <main className="dashboard-main">
             <div className="dashboard-header-text">
@@ -167,6 +169,25 @@ export default function Dashboard({ onLogout }) {
             onClose={() => setIdAEliminar(null)}
             onConfirm={confirmarBorrado}
         />
+        {modalHistorialAbierto && (
+            <div className="modal-overlay" onClick={() => setModalHistorialAbierto(false)}>
+                <div 
+                    className="modal-container modal-historial" 
+                    onClick={(e) => e.stopPropagation()} 
+                >
+                    <div className="modal-historial-header">
+                        <h3>Historial Completo</h3>
+                        <button className="btn-cancelar" onClick={() => setModalHistorialAbierto(false)}>Cerrar</button>
+                    </div>
+                    
+                    <TransaccionesList 
+                        transacciones={transacciones}
+                        onEliminar={handleEliminarTransaccion}
+                        onEditar={handleEditarTransaccion}
+                    />
+                </div>
+            </div>
+        )}
     </div>
     )
 }

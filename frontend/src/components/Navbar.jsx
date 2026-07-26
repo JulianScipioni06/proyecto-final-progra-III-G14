@@ -4,7 +4,7 @@ import { BiWalletAlt } from 'react-icons/bi';
 import ModalConfiguracion from './ModalConfiguracion';
 import '../styles/components/Navbar.css';
 
-export default function Navbar({ onLogout, onAbrirModal }) {
+export default function Navbar({ onLogout, onAbrirModal, onAbrirHistorial }) {
     const [modalAbierto, setModalAbierto] = useState(false);
 
     return (
@@ -20,7 +20,7 @@ export default function Navbar({ onLogout, onAbrirModal }) {
                         <FiLayout size={18} />
                         Dashboard
                     </li>
-                    <li>
+                    <li onClick={onAbrirHistorial} style={{cursor: 'pointer'}}>
                         <FiList size={18} />
                         Historial
                     </li>

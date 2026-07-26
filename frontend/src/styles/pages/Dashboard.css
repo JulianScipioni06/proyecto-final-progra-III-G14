@@ -40,6 +40,20 @@ body {
     align-items: start;
 }
 
+.modal-historial {
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-historial-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
 @media (max-width: 768px) {
     .dashboard-cards-section {
         flex-direction: column;
