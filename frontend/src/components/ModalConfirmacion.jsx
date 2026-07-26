@@ -8,7 +8,7 @@ export default function ModalConfirmacion({ isOpen, onClose, onConfirm}){
 
     return(
 
-        <div className="modal-overlay">
+        <div className="modal-overlay modal-prioritario">
             <div className="modal-container confirmacion-container">
                 <div className="confirmacion-icono">
                     <FiAlertTriangle/>
